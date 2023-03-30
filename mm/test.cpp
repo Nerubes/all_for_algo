@@ -40,9 +40,10 @@ TEST_CASE("Testing MM with Deleting elements on destruct") {
       CHECK(mm.deleteObject(obj) == true);
     }
   }
-  TestClass* wrong_obj = new TestClass();
+  TestClass *wrong_obj = new TestClass();
   CHECK(mm.deleteObject(wrong_obj) == false);
   CHECK_NOTHROW(mm.clear());
+  delete wrong_obj;
 }
 
 TEST_CASE("Testing MM without Deleting elements on destruct") {
@@ -69,7 +70,7 @@ TEST_CASE("Testing MM without Deleting elements on destruct") {
 TEST_CASE("Testing MM without Deleting elements on destruct (not actually deleting elements)") {
   int size = 100;
   CMemoryManager mm = CMemoryManager<TestClass>(size, false);
-  std::vector<TestClass*> pointers;
+  std::vector<TestClass *> pointers;
   int amount = 1000;
   for (int i = 0; i < amount; ++i) {
     TestClass *obj = mm.newObject();
@@ -80,12 +81,15 @@ TEST_CASE("Testing MM without Deleting elements on destruct (not actually deleti
   for (auto& obj : pointers) {
     CHECK(mm.deleteObject(obj) == true);
   }
+  for (auto i : pointers) {
+    mm.deleteObject(i);
+  }
 }
 
 TEST_CASE("Testing clear") {
   int size = 100;
   CMemoryManager mm = CMemoryManager<TestClass>(size, true);
-  std::vector<TestClass*> pointers;
+  std::vector<TestClass *> pointers;
   int amount = 1000;
   for (int i = 0; i < amount; ++i) {
     TestClass *obj = mm.newObject();

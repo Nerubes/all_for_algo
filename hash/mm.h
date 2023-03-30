@@ -143,7 +143,7 @@ class CMemoryManager {
   // ??????? ????? ???? ??????. ??????????? ? newObject
   block *newBlock() {
     T *data = reinterpret_cast<T *>(new char[sizeof(T) * m_blkSize]);
-    auto new_block = new block(data);
+    block *new_block = new block(data);
     for (int i = 0; i < m_blkSize; ++i) {
       *(reinterpret_cast<int *>(data + i)) = i + 1;
     }
