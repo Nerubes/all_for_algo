@@ -1,9 +1,8 @@
 #ifndef MEMORY_MANAGER_HEAD_H_2023_02_10
 #define MEMORY_MANAGER_HEAD_H_2023_02_10
 
-#include <iostream>
 #include <cstring>
-#include <unordered_set>
+//#include <unordered_set>
 
 namespace lab618 {
 
@@ -15,13 +14,13 @@ class CMemoryManager {
       firstFreeIndex = 0;
       usedCount = 0;
     }
-    // Массив данных блока
+    // ?????? ?????? ?????
     T *pdata;
-    // Адрес следующего блока
+    // ????? ?????????? ?????
     block *pnext;
-    // Первая свободная ячейка
+    // ?????? ????????? ??????
     int firstFreeIndex;
-    // Число заполненных ячеек
+    // ????? ??????????? ?????
     int usedCount;
   };
 
@@ -33,9 +32,9 @@ class CMemoryManager {
 
  public:
   /**
-    _default_block_size - количество элементов в блоке данных
-    isDeleteElementsOnDestruct - уничтожать елементы в деструкторе менеджера или
-    проверять на наличие неосвобожденных функцией deleteObject элементов.
+    _default_block_size - ?????????? ????????? ? ????? ??????
+    isDeleteElementsOnDestruct - ?????????? ???????? ? ??????????? ????????? ???
+    ????????? ?? ??????? ??????????????? ???????? deleteObject ?????????.
   */
   CMemoryManager(int _default_block_size,
                  bool isDeleteElementsOnDestruct = false) {
@@ -49,7 +48,7 @@ class CMemoryManager {
     clear();
   }
 
-  // Получить адрес нового элемента из менеджера
+  // ???????? ????? ?????? ???????? ?? ?????????
   T *newObject() {
     if (m_pCurrentBlk == nullptr) {
       block *new_block = newBlock();
@@ -73,15 +72,15 @@ class CMemoryManager {
       }
     }
     int free = m_pCurrentBlk->firstFreeIndex;
-    int next_free = *reinterpret_cast<int*>(m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex);
-    memset(reinterpret_cast<void*>((m_pCurrentBlk->pdata + free)), 0, sizeof(T));
+    int next_free = *reinterpret_cast<int *>(m_pCurrentBlk->pdata + m_pCurrentBlk->firstFreeIndex);
+    memset(reinterpret_cast<void *>((m_pCurrentBlk->pdata + free)), 0, sizeof(T));
     m_pCurrentBlk->firstFreeIndex = next_free;
     ++m_pCurrentBlk->usedCount;
-    T* obj = new ((m_pCurrentBlk->pdata + free)) T();
+    T *obj = new((m_pCurrentBlk->pdata + free)) T();
     return obj;
   }
 
-  // Освободить элемент в менеджере
+  // ?????????? ??????? ? ?????????
   bool deleteObject(T *p) {
     block *del_block = m_pBlocks;
     while (del_block != nullptr) {
@@ -91,7 +90,7 @@ class CMemoryManager {
           if ((del_block->pdata + free) == p) {
             return false;
           }
-          free = *reinterpret_cast<int*>(del_block->pdata + free);
+          free = *reinterpret_cast<int *>(del_block->pdata + free);
         }
         m_pCurrentBlk = del_block;
         --m_pCurrentBlk->usedCount;
@@ -105,21 +104,15 @@ class CMemoryManager {
     return false;
   }
 
-  // Очистка данных, зависит от m_isDeleteElementsOnDestruct
+  // ??????? ??????, ??????? ?? m_isDeleteElementsOnDestruct
   void clear() {
     if (m_isDeleteElementsOnDestruct) {
       while (m_pBlocks != nullptr) {
-        std::unordered_set<int> free;
-        int first = m_pBlocks->firstFreeIndex;
-        while (first != m_blkSize) {
-          free.insert(first);
-          first = *reinterpret_cast<int *>(m_pBlocks->pdata + first);
-        }
-        for (int i = 0; i < m_blkSize; ++i) {
-          if (free.find(i) == free.end()) {
-            T *elem = m_pBlocks->pdata + i;
-            elem->~T();
-          }
+        int index = m_pBlocks->firstFreeIndex;
+        while (index != m_blkSize) {
+          int next_index = *reinterpret_cast<int *>(m_pBlocks->pdata + index);
+          (m_pBlocks->pdata + index)->~T();
+          index = next_index;
         }
         block *curr = m_pBlocks->pnext;
         deleteBlock(m_pBlocks);
@@ -138,7 +131,7 @@ class CMemoryManager {
   }
 
  private:
-  // Создать новый блок данных. применяется в newObject
+  // ??????? ????? ???? ??????. ??????????? ? newObject
   block *newBlock() {
     T *data = reinterpret_cast<T *>(new char[sizeof(T) * m_blkSize]);
     auto new_block = new block(data);
@@ -148,19 +141,19 @@ class CMemoryManager {
     return new_block;
   }
 
-  // Освободить память блока данных. Применяется в clear
+  // ?????????? ?????? ????? ??????. ??????????? ? clear
   void deleteBlock(block *p) {
     delete[] reinterpret_cast<char *>(p->pdata);
     delete p;
   }
 
-  // Размер блока
+  // ?????? ?????
   int m_blkSize;
-  // Начало списка блоков
+  // ?????? ?????? ??????
   block *m_pBlocks;
-  // Текущий блок
+  // ??????? ????
   block *m_pCurrentBlk;
-  // Удалять ли элементы при освобождении
+  // ??????? ?? ???????? ??? ????????????
   bool m_isDeleteElementsOnDestruct;
 };
 };  // namespace lab618
