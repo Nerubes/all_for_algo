@@ -108,11 +108,20 @@ class CMemoryManager {
   void clear() {
     if (m_isDeleteElementsOnDestruct) {
       while (m_pBlocks != nullptr) {
+        bool free[m_blkSize];
+        for (int i = 0; i < m_blkSize; ++i) {
+          free[i] = false;
+        }
         int index = m_pBlocks->firstFreeIndex;
         while (index != m_blkSize) {
           int next_index = *reinterpret_cast<int *>(m_pBlocks->pdata + index);
-          (m_pBlocks->pdata + index)->~T();
+          free[index] = true;
           index = next_index;
+        }
+        for (int i = 0; i < m_blkSize; ++i) {
+          if (!free[i]) {
+            m_pBlocks->pdata->~T();
+          }
         }
         block *curr = m_pBlocks->pnext;
         deleteBlock(m_pBlocks);
