@@ -120,7 +120,7 @@ class CMemoryManager {
         }
         for (int i = 0; i < m_blkSize; ++i) {
           if (!free[i]) {
-            (m_pBlocks + i)->pdata->~T();
+            (m_pBlocks->pdata + i)->~T();
           }
         }
         block *curr = m_pBlocks->pnext;
