@@ -85,13 +85,6 @@ class CMemoryManager {
     block *del_block = m_pBlocks;
     while (del_block != nullptr) {
       if ((del_block->pdata <= p) && (p <= (del_block->pdata + m_blkSize))) {
-        int free = del_block->firstFreeIndex;
-        while (free < m_blkSize) {
-          if ((del_block->pdata + free) == p) {
-            return false;
-          }
-          free = *reinterpret_cast<int *>(del_block->pdata + free);
-        }
         m_pCurrentBlk = del_block;
         --m_pCurrentBlk->usedCount;
         p->~T();
@@ -107,8 +100,8 @@ class CMemoryManager {
   // ??????? ??????, ??????? ?? m_isDeleteElementsOnDestruct
   void clear() {
     if (m_isDeleteElementsOnDestruct) {
+      bool* free = new bool [m_blkSize];
       while (m_pBlocks != nullptr) {
-        bool free[m_blkSize];
         for (int i = 0; i < m_blkSize; ++i) {
           free[i] = false;
         }
@@ -127,6 +120,7 @@ class CMemoryManager {
         deleteBlock(m_pBlocks);
         m_pBlocks = curr;
       }
+      delete[] free;
     } else {
       while (m_pBlocks != nullptr) {
         if (m_pBlocks->usedCount != 0) {
@@ -137,6 +131,8 @@ class CMemoryManager {
         m_pBlocks = curr;
       }
     }
+    m_pBlocks = nullptr;
+    m_pCurrentBlk = nullptr;
   }
 
  private:

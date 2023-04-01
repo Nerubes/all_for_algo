@@ -61,9 +61,6 @@ TEST_CASE("Testing MM without Deleting elements on destruct") {
   for (auto& obj : pointers) {
     CHECK(mm.deleteObject(obj) == true);
   }
-  for (auto& obj : pointers) {
-    CHECK(mm.deleteObject(obj) == false);
-  }
   delete wrong_obj;
 }
 
@@ -80,9 +77,6 @@ TEST_CASE("Testing MM without Deleting elements on destruct (not actually deleti
   CHECK_THROWS(mm.clear());
   for (auto& obj : pointers) {
     CHECK(mm.deleteObject(obj) == true);
-  }
-  for (auto i : pointers) {
-    mm.deleteObject(i);
   }
 }
 
