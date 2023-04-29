@@ -78,6 +78,7 @@ class CHash {
   */
   virtual ~CHash() {
     clear();
+    delete[] m_pTable;
   }
 
   /**
@@ -159,8 +160,9 @@ class CHash {
   */
   void clear() {
     m_Memory.clear();
-    delete[] m_pTable;
-    m_pTable = nullptr;
+    for (int i = 0; i < m_tableSize; ++i) {
+      m_pTable[i] = nullptr;
+    }
   }
  private:
   /**

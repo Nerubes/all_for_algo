@@ -1,5 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
+<<<<<<< HEAD
 #include "avltree.h"
 #include "src/doctest.h"
 
@@ -109,3 +110,8 @@ TEST_CASE("Update and Add with Class with untracked fields") {
   delete[] data;
   delete[] data_check;
 }
+=======
+#include "src/doctest.h"
+#include "avltree.h"
+
+>>>>>>> origin/master

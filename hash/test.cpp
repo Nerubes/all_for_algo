@@ -117,3 +117,27 @@ TEST_CASE("Update and Add with Class with untracked fields") {
   delete[] data;
   delete[] data_check;
 }
+
+TEST_CASE("Adding after clear") {
+  CHash hashTable = CHash<unsigned int, hash, Cmp>(100, 100);
+  int amount = 1000;
+  unsigned int *data = new unsigned int[amount];
+  unsigned int *data_check = new unsigned int[amount];
+  for (unsigned int i = 0; i < amount; ++i) {
+    data[i] = i;
+    data_check[i] = i;
+    CHECK(hashTable.add(data + i) == true);
+  }
+  for (unsigned int i = 0; i < amount; ++i) {
+    CHECK(hashTable.add(data_check + i) == false);
+  }
+  hashTable.clear();
+  for (unsigned int i = 0; i < amount; ++i) {
+    CHECK(hashTable.add(data + i) == true);
+  }
+  for (unsigned int i = 0; i < amount; ++i) {
+    CHECK(hashTable.find(i) == (data + i));
+  }
+  delete[] data;
+  delete[] data_check;
+}
