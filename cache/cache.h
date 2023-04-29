@@ -1,7 +1,8 @@
-#ifndef HASH_HEAD_H_2023_03_23
-#define HASH_HEAD_H_2023_03_23
+#ifndef HASH_HEAD_H_2023_04_27
+#define HASH_HEAD_H_2023_04_27
 
-#include "src/mm.h" // необходимо использовать свой memorymanager
+// необходимо использовать свой memorymanager
+#include "src/mm.h"
 
 namespace lab618 {
 /**
@@ -36,7 +37,7 @@ namespace lab618 {
 Хранение данных производится вне рамок данного класса!
 */
 template<class T, unsigned int(*HashFunc)(const T *pElement), int(*Compare)(const T *pElement, const T *pElement2)>
-class CHash {
+class Cache {
  private:
   /**
   Лист списка элементов. Обратите внимание, что хранится указатель на данные.
@@ -47,6 +48,8 @@ class CHash {
     leaf() = default;
     T *pData = nullptr;
     leaf *pnext = nullptr;
+    leaf *older = nullptr;
+    leaf *newer = nullptr;
   };
 
  public:
@@ -65,71 +68,63 @@ class CHash {
   Размер Хеш таблицы реализуем жестко — изменение размера таблицы в зависимости от числа элементов в контейнере не требуется.
   Все создаваемые листики списков разрешения коллизий храним в менеджере памяти.
   */
-  CHash(int hashTableSize, int defaultBlockSize) {
-    m_Memory = CMemoryManager<leaf>(defaultBlockSize, true);
-    m_tableSize = hashTableSize;
+  Cache(int Size, T*(*gen)()) {
+    m_Memory = CMemoryManager<leaf>(1024, true);
+    generator = gen;
+    size = 0;
+    max_size = Size;
+    m_tableSize = 1024;
     m_pTable = new leaf *[m_tableSize];
-    for (int i = 0; i < hashTableSize; ++i) {
+    for (int i = 0; i < m_tableSize; ++i) {
       m_pTable[i] = nullptr;
     }
   }
   /**
   Деструктор. Должен освобождать всю выделенную память
   */
-  virtual ~CHash() {
+  virtual ~Cache() {
     clear();
   }
 
   /**
   Функция добавления элемента в Хеш-таблицу. Возвращает false, если элемент уже есть и true, если элемент добавлен.
   */
-  bool add(T *pElement) {
-    unsigned int idx;
-    if (findLeaf(pElement, idx) != nullptr) {
-      return false;
-    }
+  void add(T *pElement) {
+    unsigned int idx = hash(pElement);
     leaf *first = m_pTable[idx];
     leaf *newFirst = m_Memory.newObject();
     newFirst->pnext = first;
+    newFirst->newer = nullptr;
+    newFirst->older = newest;
     newFirst->pData = pElement;
+    newest = newFirst;
     m_pTable[idx] = newFirst;
-    return true;
-  }
-  /**
-  Функция обновления элемента в Хеш-таблице. Обновляет, если элемент уже есть добавляет, если элемента еще нет.
-  Возвращает false, если был добавлен новый элемент, true если элемент обновлен.
-  */
-  bool update(T *pElement) {
-    unsigned int idx;
-    leaf *element = findLeaf(pElement, idx);
-    if (element != nullptr) {
-      element->pData = pElement;
-      return true;
-    }
-    leaf *first = m_pTable[idx];
-    leaf *newFirst = m_Memory.newObject();
-    newFirst->pnext = first;
-    newFirst->pData = pElement;
-    m_pTable[idx] = newFirst;
-    return false;
   }
 
   /**
   Функция поиска элемента в Хеш-таблице. Возвращает указатель на данные. Если элемента не нашлось, то null.
   Обратите внимание, что для поиска используется частично заполненный объект, т.е. В нем должны быть заполнены поля на основе которых рассчитывается хеш.*/
-  T *find(const T& element) {
+  T *find(T* element) {
     unsigned int idx;
     leaf *ans = findLeaf(&element, idx);
     if (ans == nullptr) {
-      return nullptr;
+      // add new elem
+      if (size == max_size) {
+        remove(oldest);
+      }
+      add(element);
+      return element;
     }
+
+    // make elem newest;
+
     return ans->pData;
   }
 
   /**
   Функция удаления элемента из Хеш-таблицы. Возвращает false, если не нашлось элемента, true если элемент был удален.
   */
-  bool remove(const T& element) {
+  bool remove(T* element) {
     unsigned int idx = HashFunc(&element);
     idx = idx % m_tableSize;
     leaf* prev_curr = nullptr;
@@ -150,7 +145,7 @@ class CHash {
     else {
       prev_curr->pnext = curr->pnext;
     }
-    m_Memory.deleteObject(curr);
+    //m_Memory.deleteObject(curr);
     return true;
   }
 
@@ -186,6 +181,11 @@ class CHash {
     return nullptr;
   }
 
+  T* (*generator)();
+  //размер кеша
+  int size;
+  // макс размер кеша
+  int max_size;
   /**
   Размер Хеш-таблицы
   */
@@ -194,6 +194,9 @@ class CHash {
   Хеш-таблица
   */
   leaf **m_pTable;
+
+  leaf *newest = nullptr;
+  leaf *oldest = nullptr;
   /**
   Менеджер памяти, предназначен для хранение листов списков разрешения коллизий
   */
@@ -201,4 +204,4 @@ class CHash {
 };
 }; // namespace templates
 
-#endif // #define HASH_HEAD_H_2023_03_23
+#endif // #define HASH_HEAD_H_2023_04_27

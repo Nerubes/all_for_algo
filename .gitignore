@@ -5,10 +5,14 @@ list/.vscode
 mm/test
 mm/.idea
 sorts/.idea
-sorts/.test
+sorts/test
+avltree/.idea
+avltree/.vscode
+avltree/test
 .idea
 list.zip
 mm.zip
 sorts.zip
 hash.zip
+avltree.zip
 test
