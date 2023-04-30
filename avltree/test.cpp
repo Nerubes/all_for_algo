@@ -1,6 +1,5 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
-<<<<<<< HEAD
 #include "avltree.h"
 #include "src/doctest.h"
 
@@ -24,12 +23,20 @@ int CmpTestClass(const TestClass *first, const TestClass *second) {
   return static_cast<int>(first->x - second->x);
 }
 
+unsigned int hashTestClass(const TestClass *x) {
+  return x->x;
+}
+
+unsigned int hash(const unsigned int *x) {
+  return *x;
+}
+
 int Cmp(const unsigned int *first, const unsigned int *second) {
   return static_cast<int>(*first - *second);
 }
 
 TEST_CASE("Adding elements") {
-  CAVLTree hashTable = CAVLTree<unsigned int, Cmp>(100);
+  CHash hashTable = CHash<unsigned int, hash, Cmp>(100, 100);
   int amount = 1000;
   unsigned int *data = new unsigned int[amount];
   unsigned int *data_check = new unsigned int[amount];
@@ -46,7 +53,7 @@ TEST_CASE("Adding elements") {
 }
 
 TEST_CASE("Updating elements") {
-  CAVLTree hashTable = CAVLTree<unsigned int, Cmp>(100);
+  CHash hashTable = CHash<unsigned int, hash, Cmp>(100, 100);
   int amount = 1000;
   unsigned int *data = new unsigned int[amount];
   unsigned int *data_check = new unsigned int[amount];
@@ -63,7 +70,7 @@ TEST_CASE("Updating elements") {
 }
 
 TEST_CASE("Removing elements") {
-  CAVLTree hashTable = CAVLTree<unsigned int, Cmp>(100);
+  CHash hashTable = CHash<unsigned int, hash, Cmp>(100, 100);
   int amount = 1000;
   unsigned int *data = new unsigned int[amount];
   unsigned int *data_check = new unsigned int[amount];
@@ -86,7 +93,7 @@ TEST_CASE("Removing elements") {
 }
 
 TEST_CASE("Update and Add with Class with untracked fields") {
-  CAVLTree hashTable = CAVLTree<TestClass, CmpTestClass>(100);
+  CHash hashTable = CHash<TestClass, hashTestClass, CmpTestClass>(100, 100);
   int amount = 1000;
   int y = 1;
   TestClass *data = new TestClass[amount];
@@ -110,8 +117,27 @@ TEST_CASE("Update and Add with Class with untracked fields") {
   delete[] data;
   delete[] data_check;
 }
-=======
-#include "src/doctest.h"
-#include "avltree.h"
 
->>>>>>> origin/master
+TEST_CASE("Adding after clear") {
+  CHash hashTable = CHash<unsigned int, hash, Cmp>(100, 100);
+  int amount = 1000;
+  unsigned int *data = new unsigned int[amount];
+  unsigned int *data_check = new unsigned int[amount];
+  for (unsigned int i = 0; i < amount; ++i) {
+    data[i] = i;
+    data_check[i] = i;
+    CHECK(hashTable.add(data + i) == true);
+  }
+  for (unsigned int i = 0; i < amount; ++i) {
+    CHECK(hashTable.add(data_check + i) == false);
+  }
+  hashTable.clear();
+  for (unsigned int i = 0; i < amount; ++i) {
+    CHECK(hashTable.add(data + i) == true);
+  }
+  for (unsigned int i = 0; i < amount; ++i) {
+    CHECK(hashTable.find(i) == (data + i));
+  }
+  delete[] data;
+  delete[] data_check;
+}
