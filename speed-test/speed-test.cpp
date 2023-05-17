@@ -238,7 +238,7 @@ int main() {
 
     start = std::chrono::steady_clock::now();
     for (const Test& i : elems) {
-      bool tmp = avlTree.remove(i);
+      bool tmp = hashTable.remove(i);
     }
     end = std::chrono::steady_clock::now();
     times_hash_remove.push_back(
