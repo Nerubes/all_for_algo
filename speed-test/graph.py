@@ -1,7 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-grid = [10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000]
+grid = []
+
+i = 50000
+
+while i <= 1000000 :
+    grid.append(i)
+    i += 50000
 
 with open("data/sort_creation", "r") as sort, open("data/avl_creation", "r") as avl, open("data/hash_creation", "r") as hash :
     sort_data = [float(i) for i in sort.read().split("\n")[:-1]]

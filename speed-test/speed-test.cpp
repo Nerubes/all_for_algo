@@ -14,8 +14,7 @@ const std::string alphabet =
     "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ01234567"
     "89abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-const std::vector<int> amount = {10000, 20000, 30000, 40000, 50000,
-                                 60000, 70000, 80000, 90000, 100000};
+std::vector<int> amount;
 
 std::random_device rd;
 std::mt19937 gen(rd());
@@ -105,6 +104,16 @@ int main() {
   std::vector<double> times_hash_find_random;
   std::vector<double> times_avl_remove;
   std::vector<double> times_hash_remove;
+
+  for (int i = 50000; i <= 1000000; i += 50000) {
+    amount.push_back(i);
+  }
+
+  for (auto i : amount) {
+    std::cout << i << ' ';
+  }
+  std::cout << '\n';
+
   for (int n : amount) {
     std::vector elems = std::vector<Test>(n);
     for (Test& elem : elems) {
@@ -169,15 +178,10 @@ int main() {
     end = std::chrono::steady_clock::now();
     times_hash_find.push_back(
         std::chrono::duration<double>(end - start).count());
-
-    // pizda
-
     start = std::chrono::steady_clock::now();
     for (int i = 0; i < 2 * n; ++i) {
       Test* tmp = binSearch(arr, &randElems2n[i], n, TestCmp);
     }
-
-    // pizda
     end = std::chrono::steady_clock::now();
     times_sorted_find_random.push_back(
         std::chrono::duration<double>(end - start).count());
